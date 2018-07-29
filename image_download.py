@@ -5,7 +5,7 @@ from selenium.webdriver.common.keys import Keys
 
 # adding path to geckodriver to the OS environment variable
 os.environ["PATH"] += os.pathsep + os.getcwd()
-download_path = "dataset/"
+download_path = "dataset"
 
 def main():
 	searchtext = sys.argv[1]
@@ -26,6 +26,8 @@ def main():
 	img_count = 0
 	downloaded_img_count = 0
 	
+        image_urls = {};
+
 	for _ in range(int(number_of_scrolls)):
 		for __ in range(10):
 			# multiple scrolls needed to show all 400 images
@@ -56,10 +58,14 @@ def main():
 
 			r = requests.get(img_url, stream=True, headers=headers)
 			if r.status_code == 200:
-				with open(download_path + searchtext.replace(" ", "_") + "/" + str(downloaded_img_count) + "." + img_type, "wb") as f:
-					r.raw.decode_content = True
-					shutil.copyfileobj(r.raw, f)
-					downloaded_img_count += 1
+                                image_name = searchtext.replace(" ", "_") + \
+                                             str(downloaded_img_count) + "." + img_type:
+                                with open(os.path.join(download_path, searchtext.replace(" ", "_"),
+                                                        image_name), "wb") as f:
+                                    r.raw.decode_content = True
+                                    shutil.copyfileobj(r.raw, f)
+                                    downloaded_img_count += 1
+                                    image_urls[image_name] = img_url
 
 		except Exception as e:
 			print (f'Download failed: {e}')
@@ -69,6 +75,11 @@ def main():
 
 		if downloaded_img_count >= num_requested:
 			break
+
+        with open(os.path.join(download_path, 'image_urls.txt'), "w") as f:
+            f.write('name,url')
+            for img_name, img_url in image_urls.iteritems():
+                f.write(img_name + "," img_url)
 
 	print (f'Total downloaded: {downloaded_img_count}/{img_count}')
 	driver.quit()
